@@ -993,8 +993,7 @@ public class API {
             for (final String uriString : uris) {
                 log.info("Adding neighbor: " + uriString);
                 final Neighbor neighbor = instance.node.newNeighbor(new URI(uriString), true);
-                if (!instance.node.getNeighbors().contains(neighbor)) {
-                    instance.node.getNeighbors().add(neighbor);
+                if (instance.node.addNeighbor(neighbor)) {
                     numberOfAddedNeighbors++;
                 }
             }
