@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import org.apache.commons.collections4.set.ListOrderedSet;
 
 /**
  * Created by paul on 3/14/17 for iri-testnet.
@@ -62,34 +63,14 @@ public class TipsViewModel {
     }
 
     public Hash getRandomSolidTipHash() {
-        synchronized (sync) {
-            int size = solidTips.size();
-            if(size == 0) {
-                return getRandomNonSolidTipHash();
-            }
-            int index = seed.nextInt(size);
-            Iterator<Hash> hashIterator;
-            hashIterator = solidTips.iterator();
-            Hash hash = null;
-            while(index-- >= 0 && hashIterator.hasNext()){ hash = hashIterator.next();}
-            return hash;
-            //return solidTips.size() != 0 ? solidTips.get(seed.nextInt(solidTips.size())) : getRandomNonSolidTipHash();
+        synchronized (sync) {            
+            return solidTips.size() != 0 ? solidTips.get(seed.nextInt(solidTips.size())) : getRandomNonSolidTipHash();
         }
     }
 
     public Hash getRandomNonSolidTipHash() {
-        synchronized (sync) {
-            int size = tips.size();
-            if(size == 0) {
-                return null;
-            }
-            int index = seed.nextInt(size);
-            Iterator<Hash> hashIterator;
-            hashIterator = tips.iterator();
-            Hash hash = null;
-            while(index-- >= 0 && hashIterator.hasNext()){ hash = hashIterator.next();}
-            return hash;
-            //return tips.size() != 0 ? tips.get(seed.nextInt(tips.size())) : null;
+        synchronized (sync) {         
+            return tips.size() != 0 ? tips.get(seed.nextInt(tips.size())) : null;
         }
     }
 
@@ -143,11 +124,11 @@ public class TipsViewModel {
     public class FifoHashCache<K> {
 
         private int capacity;
-        private LinkedHashSet<K> set;
+        private ListOrderedSet<K> set;
 
         public FifoHashCache(int capacity) {
             this.capacity = capacity;
-            this.set = new LinkedHashSet<>();
+            this.set = new ListOrderedSet<>();
         }
 
         public boolean add(K key) {
@@ -160,6 +141,10 @@ public class TipsViewModel {
                 }
             }
             return this.set.add(key);
+        }
+        
+        public K get(int index) {
+            return this.set.get(index);
         }
 
         public boolean remove(K key) {
