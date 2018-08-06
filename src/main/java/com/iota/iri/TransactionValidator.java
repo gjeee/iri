@@ -201,10 +201,10 @@ public class TransactionValidator {
                 Set<Hash> approvers = transaction.getApprovers(tangle).getHashes();
                 for(Hash h: approvers) {
                     TransactionViewModel tx = TransactionViewModel.fromHash(tangle, h);
-                    if(quietQuickSetSolid(tx)) {
-                        tx.update(tangle, "solid");
+                    if(quietQuickSetSolid(tx)) {                    
                         addSolidTransaction(h);
                     }
+                    updateTipsView(tx);
                 }
             } catch (Exception e) {
                 log.error("Error while propagating solidity upwards", e);
@@ -212,17 +212,29 @@ public class TransactionValidator {
         }
     }
 
-    public void updateStatus(TransactionViewModel transactionViewModel) throws Exception {
-        transactionRequester.clearTransactionRequest(transactionViewModel.getHash());
-        if(transactionViewModel.getApprovers(tangle).size() == 0) {
+   
+    
+    private void updateTipsView(TransactionViewModel transactionViewModel) throws Exception {
+	    if(transactionViewModel.getApprovers(tangle).size() == 0){
             tipsViewModel.addTipHash(transactionViewModel.getHash());
+            if(transactionViewModel.isSolid()){
+		        tipsViewModel.setSolid(transactionViewModel.getHash());
+	        }
         }
+        else{
+	        tipsViewModel.removeTipHash(transactionViewModel.getHash());
+	    }
         tipsViewModel.removeTipHash(transactionViewModel.getTrunkTransactionHash());
         tipsViewModel.removeTipHash(transactionViewModel.getBranchTransactionHash());
+    }
 
-        if(quickSetSolid(transactionViewModel)) {
+    public void updateStatus(TransactionViewModel transactionViewModel) throws Exception {
+        transactionRequester.clearTransactionRequest(transactionViewModel.getHash());
+      
+	    if(quickSetSolid(transactionViewModel)) {
             addSolidTransaction(transactionViewModel.getHash());
         }
+        updateTipsView(transactionViewModel);
     }
 
     public boolean quietQuickSetSolid(TransactionViewModel transactionViewModel) {
